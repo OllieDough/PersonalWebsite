@@ -6,13 +6,12 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
   const [progress, setProgress] = useState(0);
   const [glowIntensity, setGlowIntensity] = useState(0);
   const [exploded, setExploded] = useState(false);
-  const [fadeToBlack, setFadeToBlack] = useState(false);
+  const [fadeToGold, setFadeToGold] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Progress logic
   useEffect(() => {
     const interval = setInterval(() => {
-      setProgress(prev => {
+      setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval);
           return 100;
@@ -39,9 +38,9 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
   const handleGoatClick = () => {
     if (progress < 100) return;
     setExploded(true);
-    timeoutRef.current = setTimeout(() => {
-      setFadeToBlack(true);
-      timeoutRef.current = setTimeout(onFinish, 500);
+    setTimeout(() => {
+      setFadeToGold(true);
+      setTimeout(onFinish, 3000);
     }, 300);
   };
 
@@ -66,14 +65,23 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
         width: "100vw",
         overflow: "hidden",
         position: "relative",
-        background: fadeToBlack
-          ? "black"
-          : "radial-gradient(circle, rgba(128, 0, 128, 0.8), rgba(0, 0, 0, 1))",
-        backgroundSize: "400% 400%",
-        animation: fadeToBlack ? "none" : "shimmer 12s ease-in-out infinite",
-        transition: "background-color 0.5s ease",
+        background: "radial-gradient(circle, rgba(128, 0, 128, 0.8), black)",
       }}
     >
+      {/* Smooth gold sunrise background overlay */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          background: "linear-gradient(135deg, #4b0082, #f39c12, #ffd700, #fff8dc)",
+          opacity: fadeToGold ? 1 : 0,
+          transition: "opacity 2.5s ease-in-out",
+          backgroundSize: "400% 400%",
+          animation: fadeToGold ? "sunriseGlow 12s ease-in-out infinite" : "none",
+        }}
+      />
+
       {/* Progress Bar */}
       <div
         style={{
@@ -98,7 +106,7 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
         />
       </div>
 
-      {/* Goat */}
+      {/* GOAT */}
       <div
         onClick={handleGoatClick}
         onDoubleClick={handleDoubleClick}
@@ -109,7 +117,8 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
           transform: exploded
             ? "translate(-50%, -45%) scale(100)"
             : "translate(-50%, -50%)",
-          zIndex: fadeToBlack ? -1 : 10,
+          transformOrigin: "center center",
+          zIndex: 10,
           width: "200px",
           height: "200px",
           display: "flex",
@@ -120,14 +129,23 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
             ? "none"
             : `0 0 ${glowIntensity}px ${glowIntensity / 2}px black`,
           borderRadius: "50%",
-          animation: exploded ? "blowUp 0.5s ease forwards" : "none",
+          animation: exploded ? "blowUp 1s ease forwards" : "none",
           transition: "box-shadow 0.5s ease",
         }}
       >
-        <img src="/ram.svg" alt="Goat" style={{ width: "100%", height: "100%" }} />
+        <img
+          src="/ram.svg"
+          alt="Goat"
+          style={{
+            width: "100%",
+            height: "100%",
+            filter: exploded ? "brightness(1000%) grayscale(100%)" : "none",
+            transition: "filter 1s ease",
+          }}
+        />
       </div>
 
-      {/* Orbiting Snakes & Dragons */}
+      {/* Orbiting snakes & dragons (original transform) */}
       {!exploded &&
         Array.from({ length: 8 }).map((_, index) => {
           const angle = (index / 8) * 360;
@@ -146,27 +164,12 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
                 transform: `rotate(${angle}deg) translate(150px)`,
                 width: "60px",
                 height: "60px",
+                zIndex: 5,
               }}
             />
           );
         })}
 
-      {/* Fade overlay */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundColor: fadeToBlack ? "black" : "transparent",
-          transition: "background-color 0.5s ease",
-          zIndex: 20,
-          pointerEvents: "none",
-        }}
-      ></div>
-
-      {/* Animations */}
       <style jsx>{`
         @keyframes orbit {
           0% {
@@ -179,14 +182,14 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
 
         @keyframes blowUp {
           0% {
-            transform: translate(-50%, -50%) scale(1);
+            transform: translate(-50%, -45%) scale(1);
           }
           100% {
-            transform: translate(-50%, -50%) scale(4);
+            transform: translate(-50%, -45%) scale(4);
           }
         }
 
-        @keyframes shimmer {
+        @keyframes sunriseGlow {
           0% {
             background-position: 0% 50%;
           }

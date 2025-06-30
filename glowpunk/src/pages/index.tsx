@@ -27,14 +27,14 @@ export default function Home() {
         />
         <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
           <li className="mb-2 tracking-[-.01em]">
-            Hey Tay Tay - Hows Your night going? 
+            Hey Edan - when you get a chance, shoot me a time you are free!
             {/* <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
               src/pages/index.tsx
             </code> */}
             .
           </li>
           <li className="tracking-[-.01em]">
-            So about those art pieces?
+            I would love to get to know you as soon as possible :)
           </li>
         </ol>
         <div className="flex gap-4 items-center flex-col sm:flex-row">

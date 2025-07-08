@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Github, Linkedin, Twitter } from "lucide-react";
+import { useState } from "react";
 
 const navItems = [
   { label: "About", href: "/about", hover: { rotate: -5, scale: 1.1, color: "#FF00FF" } },
@@ -19,8 +20,18 @@ const socialLinks = [
 ];
 
 export default function Navbar() {
+  const [hovering, setHovering] = useState(false);
+
   return (
-    <nav style={styles.navbar}>
+    <nav
+      style={{
+        ...styles.navbar,
+        opacity: hovering ? 1 : 0.05,
+        transition: "opacity 0.5s ease",
+      }}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+    >
       {/* Left: RAM Logo */}
       <Link href="/" style={styles.logo}>
         <motion.div whileHover={{ scale: 1.1 }} transition={{ type: "spring", stiffness: 300 }}>
@@ -80,10 +91,11 @@ const styles = {
     display: "flex",
     justifyContent: "space-between" as const,
     alignItems: "center",
-    position: "sticky" as const,
+    position: "fixed" as const,
     top: 0,
     zIndex: 1000,
-    // backgroundColor: "transparent",
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    backdropFilter: "blur(6px)",
   },
   logo: {
     display: "flex",

@@ -82,6 +82,54 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
         }}
       />
 
+      {/* Golden Quote */}
+{/* Elegant Quote */}
+<div
+  style={{
+    position: "absolute",
+    bottom: "16%",
+    left: "50%",
+    transform: "translateX(-50%)",
+    fontSize: "1.5rem",
+    fontWeight: 600,
+    fontFamily: "'Playfair Display', serif",
+    letterSpacing: "0.5px",
+    textAlign: "center",
+    whiteSpace: "pre-line",
+    zIndex: 2,
+    background: "linear-gradient(90deg, #f5e4b8, #d4af37, #fff3cc)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    opacity: 0.95,
+  }}
+>
+  “The world was too heavy, so I became light.”
+</div>
+
+{/* Progress Bar */}
+<div
+  style={{
+    position: "absolute",
+    bottom: "10%",
+    left: "10%",
+    width: "80%",
+    height: "10px",
+    background: "#444",
+    borderRadius: "5px",
+    overflow: "hidden",
+    zIndex: 30,
+  }}
+>
+  <div
+    style={{
+      width: `${progress}%`,
+      height: "100%",
+      background: "white",
+      transition: "width 0.2s",
+    }}
+  />
+</div>
+
       {/* Progress Bar */}
       <div
         style={{
@@ -106,7 +154,7 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
         />
       </div>
 
-      {/* GOAT */}
+      {/* GOAT (original centered positioning restored) */}
       <div
         onClick={handleGoatClick}
         onDoubleClick={handleDoubleClick}
@@ -145,7 +193,7 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
         />
       </div>
 
-      {/* Orbiting snakes & dragons (original transform) */}
+      {/* Orbiting snakes & dragons (original orbit restored) */}
       {!exploded &&
         Array.from({ length: 8 }).map((_, index) => {
           const angle = (index / 8) * 360;
@@ -182,10 +230,10 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
 
         @keyframes blowUp {
           0% {
-            transform: translate(-50%, -45%) scale(1);
+            transform: translate(-50%, -47%) scale(1);
           }
           100% {
-            transform: translate(-50%, -45%) scale(4);
+            transform: translate(-50%, -47%) scale(3.5);
           }
         }
 

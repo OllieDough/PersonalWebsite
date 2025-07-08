@@ -1,115 +1,193 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
+"use client";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const sections = [
+  "Hi. I'm Oliver Do. Pleasure to meet you.",
+  "What can I help you with?",
+  "Here’s what I love to do.",
+  "Guitar, food, movement, making cool sh*t.",
+  "The future is soft, wild, and glowing.",
+];
+
+const capricornStars = [
+  { top: "20%", left: "30%" },
+  { top: "22%", left: "34%" },
+  { top: "25%", left: "39%" },
+  { top: "28%", left: "43%" },
+  { top: "26%", left: "48%" },
+  { top: "29%", left: "52%" },
+  { top: "32%", left: "56%" },
+  { top: "30%", left: "60%" },
+];
+
+// Twinkling white stars
+const generateStars = (count: number) => {
+  const stars = [];
+  for (let i = 0; i < count; i++) {
+    const size = Math.random() * 2 + 1;
+    const left = Math.random() * 100;
+    const top = Math.random() * 100;
+    const duration = Math.random() * 3 + 1.5;
+    const delay = Math.random() * 5;
+    stars.push(
+      <div
+        key={`star-${i}`}
+        className="absolute rounded-full bg-white opacity-70"
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          left: `${left}%`,
+          top: `${top}%`,
+          animation: `twinkle ${duration}s ease-in-out ${delay}s infinite`,
+        }}
+      ></div>
+    );
+  }
+  return stars;
+};
 
 export default function Home() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleScroll = (e: WheelEvent) => {
+    e.preventDefault();
+    const dir = e.deltaY > 0 ? 1 : -1;
+    setCurrentIndex((prev) => {
+      const next = prev + dir;
+      if (next < 0 || next >= sections.length) return prev;
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    window.addEventListener("wheel", handleScroll, { passive: false });
+    return () => window.removeEventListener("wheel", handleScroll);
+  }, []);
+
+  const fontOptions = ["monospace", "serif", "cursive", "sans-serif"];
+
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Hey Edan - when you get a chance, shoot me a time you are free!
-            {/* <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/pages/index.tsx
-            </code> */}
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            I would love to get to know you as soon as possible :)
-          </li>
-        </ol>
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="h-screen w-screen overflow-hidden bg-black text-white relative font-mono">
+      {/* 🌌 Purple Spinning Glow Background */}
+      <div className="space stars1" />
+      <div className="space stars2" />
+      <div className="space stars3" />
+
+      {/* ✨ White Twinkling Stars */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        {generateStars(100)}
+      </div>
+
+      {/* 🐐 Capricorn Constellation */}
+      {currentIndex === 0 &&
+        capricornStars.map((pos, i) => (
+          <div
+            key={`capricorn-${i}`}
+            className="absolute w-[4px] h-[4px] bg-purple-300 rounded-full shadow-md shadow-purple-500 z-10"
+            style={{ top: pos.top, left: pos.left }}
+          ></div>
+        ))}
+
+      {/* 🎤 Section Text */}
+      <div className="h-full w-full flex flex-col items-center justify-center gap-12 z-20 relative">
+        <motion.div
+          key={currentIndex}
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -50 }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
+          className="text-3xl md:text-5xl font-bold px-4 text-center flex flex-wrap justify-center"
+        >
+          {[...sections[currentIndex]].map((char, i) => {
+            const hue = Math.floor(Math.random() * 360);
+            const scale = (Math.random() * 0.4 + 0.8).toFixed(2);
+            const rotate = (Math.random() * 20 - 10).toFixed(1);
+            const y = (Math.random() * 6 - 3).toFixed(1);
+            const glow = Math.floor(Math.random() * 8 + 4);
+            const letterSpacing = (Math.random() * 2).toFixed(1);
+            const font = fontOptions[Math.floor(Math.random() * fontOptions.length)];
+
+            return (
+              <motion.span
+                key={i}
+                className="inline-block mx-0.5"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.03 }}
+                style={{
+                  color: `hsl(${hue}, 100%, 85%)`,
+                  transform: `scale(${scale}) rotate(${rotate}deg) translateY(${y}px)`,
+                  fontFamily: font,
+                  letterSpacing: `${letterSpacing}px`,
+                  textShadow: `0 0 ${glow}px hsl(${hue}, 100%, 75%)`,
+                }}
+              >
+                {char === " " ? "\u00A0" : char}
+              </motion.span>
+            );
+          })}
+        </motion.div>
+
+        {/* ⭕ Dot Navigation */}
+        <div className="flex flex-row gap-4 z-20">
+          {sections.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentIndex(idx)}
+              className={`w-4 h-4 rounded-full transition-all duration-300 ${
+                currentIndex === idx ? "bg-purple-500 scale-125" : "bg-white/30"
+              }`}
+            ></button>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+
+      {/* ✨ CSS Styles */}
+      <style jsx global>{`
+        .space {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: rgba(128, 0, 128, 0.08) center / 100px 100px round;
+          border: 1px dashed rgba(200, 100, 255, 0.15);
+          animation: galaxy 20s linear infinite;
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        .stars1 {
+          animation-duration: 20s;
+        }
+
+        .stars2 {
+          animation-duration: 30s;
+        }
+
+        .stars3 {
+          animation-duration: 40s;
+        }
+
+        @keyframes galaxy {
+          0% {
+            transform: rotate(0deg) scale(1);
+          }
+          50% {
+            transform: rotate(180deg) scale(1.02);
+          }
+          100% {
+            transform: rotate(360deg) scale(1);
+          }
+        }
+
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.2; }
+          50% { opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }

@@ -26,7 +26,7 @@ export default function Navbar() {
     <nav
       style={{
         ...styles.navbar,
-        opacity: hovering ? 1 : 0.05,
+        opacity: hovering ? 1 : 0.25,
         transition: "opacity 0.5s ease",
       }}
       onMouseEnter={() => setHovering(true)}

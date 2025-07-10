@@ -9,6 +9,10 @@ yarn # use this to update package first
 yarn dev #use yarn for now for no surprises
 
 ```
+'
+-use this if there is a corrupted or broken module
+rm -rf node_modules .next yarn.lock
+yarn install
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 

@@ -6,6 +6,7 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
   const [glowIntensity, setGlowIntensity] = useState(0);
   const [exploded, setExploded] = useState(false);
   const [shrinking, setShrinking] = useState(false);
+  const [explosionOpacity, setExplosionOpacity] = useState(1);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -27,7 +28,21 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
     setTimeout(() => {
       setExploded(true);
       triggerExplosion();
-      setTimeout(onFinish, 1200); // allow fade to complete
+
+      // Begin fading the explosion
+      let fadeFrame = 0;
+      const fadeInterval = setInterval(() => {
+        fadeFrame++;
+        setExplosionOpacity((prev) => {
+          if (prev <= 0.01) {
+            clearInterval(fadeInterval);
+            return 0;
+          }
+          return prev - 0.02;
+        });
+      }, 50);
+
+      setTimeout(onFinish, 2400); // Index fades in while explosion fades
     }, 400);
   };
 
@@ -66,6 +81,8 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
           height: "100%",
           zIndex: 2,
           pointerEvents: "none",
+          opacity: explosionOpacity,
+          transition: "opacity 0.2s ease-out",
         }}
       />
 
@@ -136,23 +153,6 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
         </div>
       )}
 
-      {/* Fade Overlay */}
-      {exploded && (
-        <div
-          className="fade-overlay"
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "black",
-            zIndex: 100,
-            animation: "fadeToBlack 3s ease-in forwards",
-          }}
-        />
-      )}
-
       <style jsx>{`
         .splash-quote {
           position: absolute;
@@ -213,21 +213,6 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
             opacity: 0.5;
           }
         }
-
-        @keyframes fadeToBlack {
-          from {
-            opacity: 0;
-            backdrop-filter: blur(0px);
-          }
-          to {
-            opacity: 1;
-            backdrop-filter: blur(6px);
-          }
-        }
-        
-        .fade-overlay {
-          animation: fadeToBlack 1.4s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
-        }
       `}</style>
     </div>
   );
@@ -243,52 +228,64 @@ function triggerExplosion() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  const config = {
-    particleNumber: 600,
-    maxParticleSize: 6,
-    maxSpeed: 20,
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+
+  let stars: any[] = [];
+  let frame = 0;
+  const maxFrames = 300;
+
+  const createStars = (count = 100) => {
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 15 + 5;
+      const length = Math.random() * 50 + 20;
+      stars.push({
+        x: centerX,
+        y: centerY,
+        angle,
+        speed,
+        length,
+        alpha: 1,
+      });
+    }
   };
 
-  let particles: any[] = [];
-  const centerX = window.innerWidth / 2;
-  const centerY = window.innerHeight / 2;
-
-  function Particle(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-    this.r = Math.random() * config.maxParticleSize + 1;
-    this.s = Math.random() * config.maxSpeed;
-    this.d = Math.random() * 2 * Math.PI;
-    this.alpha = 1;
-  }
-
-  const update = (p: any) => {
-    p.x += p.s * Math.cos(p.d);
-    p.y += p.s * Math.sin(p.d);
-    p.r *= 0.96;
-    p.alpha -= 0.01;
-    return p;
+  const updateStars = () => {
+    stars = stars.map((star) => {
+      const vx = Math.cos(star.angle) * star.speed;
+      const vy = Math.sin(star.angle) * star.speed;
+      star.x += vx;
+      star.y += vy;
+      star.length *= 0.98;
+      star.alpha *= 0.985;
+      return star;
+    });
+    stars = stars.filter((star) => star.alpha > 0);
   };
 
-  const draw = (p: any) => {
-    ctx.beginPath();
-    ctx.fillStyle = `rgba(255,255,255,${Math.max(0, p.alpha)})`;
-    ctx.arc(p.x, p.y, p.r, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.closePath();
+  const drawStars = () => {
+    for (const star of stars) {
+      const vx = Math.cos(star.angle) * star.speed;
+      const vy = Math.sin(star.angle) * star.speed;
+      ctx.beginPath();
+      ctx.strokeStyle = `rgba(255, 255, 255, ${star.alpha})`;
+      ctx.lineWidth = 1.3;
+      ctx.moveTo(star.x, star.y);
+      ctx.lineTo(star.x - vx * star.length * 0.1, star.y - vy * star.length * 0.1);
+      ctx.stroke();
+    }
   };
 
   const render = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles = particles.map(update);
-    particles.forEach(draw);
-    particles = particles.filter((p) => p.alpha > 0);
-    if (particles.length > 0) requestAnimationFrame(render);
+    frame++;
+    ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (frame < maxFrames && frame % 2 === 0) createStars(80);
+    updateStars();
+    drawStars();
+    if (frame < maxFrames || stars.length > 0) requestAnimationFrame(render);
   };
-
-  for (let i = 0; i < config.particleNumber; i++) {
-    particles.push(new (Particle as any)(centerX, centerY));
-  }
 
   render();
 }

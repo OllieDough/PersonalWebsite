@@ -1,4 +1,3 @@
-// app/page.tsx
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
@@ -50,42 +49,13 @@ const generateStars = (count: number) => {
   return stars;
 };
 
-const OrbitingSun = ({ radius = 120 }: { radius?: number }) => {
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-  useAnimationFrame(() => {
-    setPos((prevPos) => {
-      const nextAngle = Math.atan2(prevPos.y, prevPos.x) + 0.01;
-      return {
-        x: radius * Math.cos(nextAngle),
-        y: radius * Math.sin(nextAngle),
-      };
-    });
-  });
-
-  return (
-    <motion.div
-      style={{
-        position: "absolute",
-        top: `calc(50% + ${pos.y}px)`,
-        left: `calc(50% + ${pos.x}px)`,
-        width: 80,
-        height: 80,
-        borderRadius: "50%",
-        background: "radial-gradient(circle, #FFD700, #FF8C00)",
-        boxShadow: "0 0 40px 15px rgba(255, 200, 0, 0.6)",
-        zIndex: 10,
-      }}
-      animate={{ rotate: 360 }}
-      transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
-    />
-  );
-};
-
 export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [angles, setAngles] = useState(planets.map(() => 0));
   const [stars] = useState(() => generateStars(1000));
   const [showSplash, setShowSplash] = useState(true);
+  const [fadeIn, setFadeIn] = useState(false);
+  const [mouseDistance, setMouseDistance] = useState(500);
   const fontOptions = useMemo(() => ["monospace", "serif", "cursive", "sans-serif"], []);
 
   const styledSections = useMemo(() => {
@@ -121,6 +91,22 @@ export default function Home() {
     );
   }, [fontOptions]);
 
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const distance = Math.sqrt((e.clientX - cx) ** 2 + (e.clientY - cy) ** 2);
+      setMouseDistance(distance);
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  useAnimationFrame(() => {
+    const proximityFactor = Math.max(0.5, 4 - mouseDistance / 200);
+    setAngles((prev) => prev.map((a, i) => a + planets[i].speed * proximityFactor));
+  });
+
   const handleScroll = (e: WheelEvent) => {
     e.preventDefault();
     const dir = e.deltaY > 0 ? 1 : -1;
@@ -136,14 +122,18 @@ export default function Home() {
     return () => window.removeEventListener("wheel", handleScroll);
   }, []);
 
-  useAnimationFrame(() => {
-    setAngles((prev) => prev.map((a, i) => a + planets[i].speed));
-  });
-
-  if (showSplash) return <SplashLoader onFinish={() => setShowSplash(false)} />;
+  if (showSplash)
+    return (
+      <SplashLoader
+        onFinish={() => {
+          setShowSplash(false);
+          setTimeout(() => setFadeIn(true), 300);
+        }}
+      />
+    );
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-black text-white relative font-mono">
+    <div className={`h-screen w-screen overflow-hidden bg-black text-white relative font-mono transition-opacity duration-1000 ease-in ${fadeIn ? "opacity-100" : "opacity-0"}`}>
       <div className="space stars1" />
       <div className="space stars2" />
       <div className="space stars3" />
@@ -172,8 +162,6 @@ export default function Home() {
                 backgroundColor: planet.color,
                 boxShadow: `0 0 12px 4px ${planet.color}`,
               }}
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 10 / planet.speed, ease: "linear" }}
             />
           </div>
         );
@@ -187,25 +175,23 @@ export default function Home() {
             width: planet.radius * 2,
             height: planet.radius * 2,
             left: `calc(50% - ${planet.radius}px)`,
-            top: `calc(50% - ${planet.radius}px)`,
+            top: `calc(50% - ${planet.radius}px)`
           }}
         ></div>
       ))}
 
-      <OrbitingSun />
-
       <div className="relative mt-40 w-full flex justify-center items-center z-20">
-      <motion.div
-        key={currentIndex}
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -50 }}
-        transition={{ duration: 0.6, ease: "easeInOut" }}
-        className="text-3xl md:text-5xl font-bold px-4 text-center flex flex-wrap justify-center"
-      >
-        {styledSections[currentIndex]}
-      </motion.div>
-    </div>
+        <motion.div
+          key={sections[currentIndex]}
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -50 }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
+          className="text-3xl md:text-5xl font-bold px-4 text-center flex flex-wrap justify-center"
+        >
+          {styledSections[currentIndex]}
+        </motion.div>
+      </div>
 
       <div className="absolute left-6 top-1/2 transform -translate-y-1/2 flex flex-col gap-4 z-20">
         {sections.map((_, idx) => (
@@ -249,17 +235,13 @@ export default function Home() {
           0% {
             transform: rotate(0deg) scale(1);
           }
-          50% {
-            transform: rotate(180deg) scale(1.02);
-          }
           100% {
             transform: rotate(360deg) scale(1);
           }
         }
 
         @keyframes twinkle {
-          0%,
-          100% {
+          0%, 100% {
             opacity: 0.2;
           }
           50% {

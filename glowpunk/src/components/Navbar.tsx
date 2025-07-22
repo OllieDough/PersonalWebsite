@@ -8,15 +8,13 @@ import { useState } from "react";
 
 const navItems = [
   { label: "About", href: "/about", hover: { rotate: -5, scale: 1.1, color: "#FF00FF" } },
-  { label: "Projects", href: "/projects", hover: { rotate: 5, scale: 1.15, color: "#00FFFF" } },
   { label: "Contact", href: "/contact", hover: { y: -5, color: "#FF6600" } },
   { label: "Resume", href: "/resume", hover: { x: 5, color: "#00FF00" } },
 ];
 
 const socialLinks = [
-  { icon: <Github size={20} />, href: "https://github.com/yourusername" },
-  { icon: <Linkedin size={20} />, href: "https://linkedin.com/in/yourusername" },
-  { icon: <Twitter size={20} />, href: "https://twitter.com/yourusername" },
+  { icon: <Github size={20} />, href: "https://github.com/OllieDough" },
+  { icon: <Linkedin size={20} />, href: "https://www.linkedin.com/in/oliver9324/" },
 ];
 
 export default function Navbar() {

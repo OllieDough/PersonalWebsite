@@ -31,7 +31,7 @@ export default function ResumePage() {
   const experiences = [
     {
       title: "Founder & Engineer",
-      company: "EmberAndTide",
+      company: "Ember&Tide",
       duration: "July 2025 – Present",
       location: "Irvine, CA",
       highlights: [
@@ -116,7 +116,7 @@ export default function ResumePage() {
     },
     {
       name: "E-commerce Marketplace",
-      description: "Developed multi-vendor marketplace for EmberAndTide client with Stripe Connect, real-time inventory management, and advanced search using Elasticsearch.",
+      description: "Developed multi-vendor marketplace for Client with Stripe Connect, real-time inventory management, and advanced search using Elasticsearch.",
       tech: ["React", "Node.js", "Stripe", "Elasticsearch", "AWS"],
       gradient: "from-blue-500 to-cyan-500"
     },

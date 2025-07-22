@@ -6,7 +6,7 @@ import SplashLoader from "@/components/SplashLoader";
 import Image from "next/image";
 
 const sections = [
-  "WELCOME TO THE GLOWPUNK UNIVERSE",
+  "THE GLOWPUNK UNIVERSE",
   "What can I help you with?",
   "Here’s what I love to do.",
   "Guitar, food, movement, making cool sh*t.",
@@ -49,13 +49,42 @@ const generateStars = (count: number) => {
   return stars;
 };
 
+const OrbitingSun = ({ radius = 120 }: { radius?: number }) => {
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  useAnimationFrame(() => {
+    setPos((prevPos) => {
+      const nextAngle = Math.atan2(prevPos.y, prevPos.x) + 0.01;
+      return {
+        x: radius * Math.cos(nextAngle),
+        y: radius * Math.sin(nextAngle),
+      };
+    });
+  });
+
+  return (
+    <motion.div
+      style={{
+        position: "absolute",
+        top: `calc(50% + ${pos.y}px)`,
+        left: `calc(50% + ${pos.x}px)`,
+        width: 80,
+        height: 80,
+        borderRadius: "50%",
+        background: "radial-gradient(circle, #FFD700, #FF8C00)",
+        boxShadow: "0 0 40px 15px rgba(255, 200, 0, 0.6)",
+        zIndex: 10,
+      }}
+      animate={{ rotate: 360 }}
+      transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
+    />
+  );
+};
+
 export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [angles, setAngles] = useState(planets.map(() => 0));
   const [stars] = useState(() => generateStars(1000));
   const [showSplash, setShowSplash] = useState(true);
-  const [fadeIn, setFadeIn] = useState(false);
-  const [mouseDistance, setMouseDistance] = useState(500);
   const fontOptions = useMemo(() => ["monospace", "serif", "cursive", "sans-serif"], []);
 
   const styledSections = useMemo(() => {
@@ -91,22 +120,6 @@ export default function Home() {
     );
   }, [fontOptions]);
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
-      const distance = Math.sqrt((e.clientX - cx) ** 2 + (e.clientY - cy) ** 2);
-      setMouseDistance(distance);
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
-  useAnimationFrame(() => {
-    const proximityFactor = Math.max(0.5, 4 - mouseDistance / 200);
-    setAngles((prev) => prev.map((a, i) => a + planets[i].speed * proximityFactor));
-  });
-
   const handleScroll = (e: WheelEvent) => {
     e.preventDefault();
     const dir = e.deltaY > 0 ? 1 : -1;
@@ -122,133 +135,143 @@ export default function Home() {
     return () => window.removeEventListener("wheel", handleScroll);
   }, []);
 
-  if (showSplash)
-    return (
-      <SplashLoader
-        onFinish={() => {
-          setShowSplash(false);
-          setTimeout(() => setFadeIn(true), 300);
-        }}
-      />
-    );
+  useAnimationFrame(() => {
+    setAngles((prev) => prev.map((a, i) => a + planets[i].speed));
+  });
 
   return (
-    <div className={`h-screen w-screen overflow-hidden bg-black text-white relative font-mono transition-opacity duration-1000 ease-in ${fadeIn ? "opacity-100" : "opacity-0"}`}>
-      <div className="space stars1" />
-      <div className="space stars2" />
-      <div className="space stars3" />
-      <div className="absolute inset-0 z-0 pointer-events-none">{stars}</div>
+    <div className="relative">
+      {showSplash && <SplashLoader onFinish={() => setShowSplash(false)} />}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: showSplash ? 0 : 1 }}
+        transition={{ duration: 2.5, ease: "easeInOut" }}
+        className="h-screen w-screen overflow-hidden bg-black text-white font-mono"
+      >
+        <div className="space stars1" />
+        <div className="space stars2" />
+        <div className="space stars3" />
+        <div className="absolute inset-0 z-0 pointer-events-none">{stars}</div>
 
-      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-yellow-400 shadow-[0_0_80px_30px_rgba(255,200,0,0.5)] animate-pulse z-10" />
+        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-yellow-400 shadow-[0_0_80px_30px_rgba(255,200,0,0.5)] animate-pulse z-10" />
 
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 w-28 h-28">
-        <Image src="/ram.svg" alt="Goat" width={112} height={112} />
-      </div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 w-28 h-28">
+          <Image src="/ram.svg" alt="Goat" width={112} height={112} />
+        </div>
 
-      {planets.map((planet, i) => {
-        const x = planet.radius * Math.cos(angles[i]);
-        const y = planet.radius * Math.sin(angles[i]);
-        return (
+        {planets.map((planet, i) => {
+          const x = planet.radius * Math.cos(angles[i]);
+          const y = planet.radius * Math.sin(angles[i]);
+          return (
+            <div
+              key={planet.name}
+              className="absolute"
+              style={{ left: `calc(50% + ${x}px)`, top: `calc(50% + ${y}px)` }}
+            >
+              <motion.div
+                className="rounded-full shadow-lg"
+                style={{
+                  width: planet.size,
+                  height: planet.size,
+                  backgroundColor: planet.color,
+                  boxShadow: `0 0 12px 4px ${planet.color}`,
+                }}
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 10 / planet.speed, ease: "linear" }}
+              />
+            </div>
+          );
+        })}
+
+        {planets.map((planet) => (
           <div
-            key={planet.name}
-            className="absolute"
-            style={{ left: `calc(50% + ${x}px)`, top: `calc(50% + ${y}px)` }}
-          >
-            <motion.div
-              className="rounded-full shadow-lg"
-              style={{
-                width: planet.size,
-                height: planet.size,
-                backgroundColor: planet.color,
-                boxShadow: `0 0 12px 4px ${planet.color}`,
-              }}
-            />
-          </div>
-        );
-      })}
-
-      {planets.map((planet) => (
-        <div
-          key={`orbit-${planet.name}`}
-          className="absolute border border-dashed border-gray-500/20 rounded-full"
-          style={{
-            width: planet.radius * 2,
-            height: planet.radius * 2,
-            left: `calc(50% - ${planet.radius}px)`,
-            top: `calc(50% - ${planet.radius}px)`
-          }}
-        ></div>
-      ))}
-
-      <div className="relative mt-40 w-full flex justify-center items-center z-20">
-        <motion.div
-          key={sections[currentIndex]}
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -50 }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
-          className="text-3xl md:text-5xl font-bold px-4 text-center flex flex-wrap justify-center"
-        >
-          {styledSections[currentIndex]}
-        </motion.div>
-      </div>
-
-      <div className="absolute left-6 top-1/2 transform -translate-y-1/2 flex flex-col gap-4 z-20">
-        {sections.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => setCurrentIndex(idx)}
-            className={`w-4 h-4 rounded-full transition-all duration-300 ${
-              currentIndex === idx ? "bg-purple-500 scale-125" : "bg-white/30"
-            }`}
-          ></button>
+            key={`orbit-${planet.name}`}
+            className="absolute border border-dashed border-gray-500/20 rounded-full"
+            style={{
+              width: planet.radius * 2,
+              height: planet.radius * 2,
+              left: `calc(50% - ${planet.radius}px)`,
+              top: `calc(50% - ${planet.radius}px)`,
+            }}
+          ></div>
         ))}
-      </div>
 
-      <style jsx global>{`
-        .space {
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          background: rgba(128, 0, 128, 0.08) center / 100px 100px round;
-          border: 1px dashed rgba(200, 100, 255, 0.15);
-          animation: galaxy 20s linear infinite;
-          pointer-events: none;
-          z-index: 0;
-        }
+        <OrbitingSun />
 
-        .stars1 {
-          animation-duration: 20s;
-        }
+        <div className="relative mt-40 w-full flex justify-center items-center z-20">
+          <motion.div
+            key={currentIndex}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
+            className="text-3xl md:text-5xl font-bold px-4 text-center flex flex-wrap justify-center"
+          >
+            {styledSections[currentIndex]}
+          </motion.div>
+        </div>
 
-        .stars2 {
-          animation-duration: 30s;
-        }
+        <div className="absolute left-6 top-1/2 transform -translate-y-1/2 flex flex-col gap-4 z-20">
+          {sections.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentIndex(idx)}
+              className={`w-4 h-4 rounded-full transition-all duration-300 ${
+                currentIndex === idx ? "bg-purple-500 scale-125" : "bg-white/30"
+              }`}
+            ></button>
+          ))}
+        </div>
 
-        .stars3 {
-          animation-duration: 40s;
-        }
-
-        @keyframes galaxy {
-          0% {
-            transform: rotate(0deg) scale(1);
+        <style jsx global>{`
+          .space {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(128, 0, 128, 0.08) center / 100px 100px round;
+            border: 1px dashed rgba(200, 100, 255, 0.15);
+            animation: galaxy 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
           }
-          100% {
-            transform: rotate(360deg) scale(1);
-          }
-        }
 
-        @keyframes twinkle {
-          0%, 100% {
-            opacity: 0.2;
+          .stars1 {
+            animation-duration: 20s;
           }
-          50% {
-            opacity: 1;
+
+          .stars2 {
+            animation-duration: 30s;
           }
-        }
-      `}</style>
+
+          .stars3 {
+            animation-duration: 40s;
+          }
+
+          @keyframes galaxy {
+            0% {
+              transform: rotate(0deg) scale(1);
+            }
+            50% {
+              transform: rotate(180deg) scale(1.02);
+            }
+            100% {
+              transform: rotate(360deg) scale(1);
+            }
+          }
+
+          @keyframes twinkle {
+            0%,
+            100% {
+              opacity: 0.2;
+            }
+            50% {
+              opacity: 1;
+            }
+          }
+        `}</style>
+      </motion.div>
     </div>
   );
 }

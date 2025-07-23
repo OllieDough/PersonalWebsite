@@ -110,7 +110,7 @@ export default function ResumePage() {
   const projects = [
     {
       name: "AI-Powered Content Platform",
-      description: "Built a full-stack platform for EmberAndTide client using Next.js 14, OpenAI API, and Vercel. Features include real-time collaboration, AI content generation, and analytics dashboard.",
+      description: "Built a full-stack platform for Ember&Tide client using Next.js 14, OpenAI API, and Vercel. Features include real-time collaboration, AI content generation, and analytics dashboard.",
       tech: ["Next.js", "OpenAI", "PostgreSQL", "Vercel", "TailwindCSS"],
       gradient: "from-violet-500 to-purple-500"
     },
@@ -356,7 +356,7 @@ export default function ResumePage() {
               transition={{ delay: 0.5, duration: 0.8 }}
               className="text-zinc-300 text-lg font-light tracking-widest uppercase"
             >
-              Founder · <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">EmberAndTide</span>
+              Founder · <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Ember&Tide</span>
             </motion.p>
 
             <motion.div

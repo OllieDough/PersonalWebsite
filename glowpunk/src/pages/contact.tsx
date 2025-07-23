@@ -12,6 +12,10 @@ export default function ContactPage() {
   });
   const [charCount, setCharCount] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -31,9 +35,156 @@ export default function ContactPage() {
     }
   };
 
-  const handleSubmit = () => {
-    // Handle form submission here
-    console.log("Form submitted:", formData);
+  const handleSubmit = async () => {
+    // Prevent multiple submissions
+    if (isSubmitting) return;
+    
+    // Validate form
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.message) {
+      setShowValidationModal(true);
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    // Simulate API call
+    try {
+      // Add a small delay to simulate network request
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Here you would normally make your API call
+      // For now, we'll simulate success/failure randomly
+      const isSuccess = Math.random() > 0.2; // 80% success rate for demo
+      
+      if (isSuccess) {
+        setShowSuccessModal(true);
+        // Reset form after successful submission
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          message: ""
+        });
+        setCharCount(0);
+      } else {
+        throw new Error("Failed to send message");
+      }
+    } catch (error) {
+      setShowErrorModal(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const Modal = ({ isOpen, onClose, type }) => {
+    useEffect(() => {
+      if (isOpen) {
+        // Prevent body scroll when modal is open
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'unset';
+      }
+      
+      return () => {
+        document.body.style.overflow = 'unset';
+      };
+    }, [isOpen]);
+    
+    if (!isOpen) return null;
+
+    const isSuccess = type === 'success';
+    const isValidation = type === 'validation';
+    
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        {/* Backdrop */}
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+        
+        {/* Modal Content */}
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.8, opacity: 0 }}
+          transition={{ type: "spring", damping: 15 }}
+          className="relative max-w-md w-full"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="relative bg-black/90 backdrop-blur-xl rounded-3xl p-8 border border-purple-500/30 shadow-2xl overflow-hidden">
+            {/* Gradient glow effect */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${
+              isValidation ? 'from-amber-500/20 to-purple-500/20' : 
+              isSuccess ? 'from-green-500/20 to-purple-500/20' : 
+              'from-red-500/20 to-purple-500/20'
+            } opacity-50`} />
+            
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              {/* Animated Icon */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", damping: 10 }}
+                className="text-6xl mb-4"
+              >
+                {isValidation ? '⚠️' : isSuccess ? '✨' : '😔'}
+              </motion.div>
+              
+              {/* Title */}
+              <h3 className="text-2xl font-bold mb-3">
+                <span className={`bg-gradient-to-r ${
+                  isValidation ? 'from-amber-400 to-yellow-400' :
+                  isSuccess ? 'from-green-400 to-yellow-400' : 
+                  'from-red-400 to-pink-400'
+                } bg-clip-text text-transparent`}>
+                  {isValidation ? 'Missing Information' : 
+                   isSuccess ? 'Message Sent!' : 
+                   'Oops, Something Went Wrong'}
+                </span>
+              </h3>
+              
+              {/* Message */}
+              <p className="text-purple-200 mb-6">
+                {isValidation 
+                  ? "Please fill in all required fields before sending your message."
+                  : isSuccess 
+                  ? "Your message has been successfully delivered. I'll get back to you within 48 hours!"
+                  : "There was an error sending your message. Please try again or reach out directly via email."}
+              </p>
+              
+              {/* Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={onClose}
+                className={`px-8 py-3 rounded-xl font-semibold text-white transition-all ${
+                  isValidation 
+                    ? 'bg-gradient-to-r from-amber-500 to-purple-500 hover:from-amber-400 hover:to-purple-400' :
+                  isSuccess 
+                    ? 'bg-gradient-to-r from-green-500 to-purple-500 hover:from-green-400 hover:to-purple-400' 
+                    : 'bg-gradient-to-r from-red-500 to-purple-500 hover:from-red-400 hover:to-purple-400'
+                } shadow-lg`}
+              >
+                {isValidation ? 'Got it!' : isSuccess ? 'Awesome!' : 'Try Again'}
+              </motion.button>
+            </div>
+            
+            {/* Decorative elements */}
+            <div className="absolute -top-4 -right-4 text-4xl animate-float opacity-50">
+              {isValidation ? '📝' : isSuccess ? '🌟' : '💔'}
+            </div>
+            <div className="absolute -bottom-4 -left-4 text-3xl animate-float opacity-50" style={{ animationDelay: '1s' }}>
+              {isValidation ? '✏️' : isSuccess ? '💫' : '😢'}
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
   };
 
   if (!isLoaded) {
@@ -159,7 +310,7 @@ export default function ContactPage() {
         {/* Twinkling stars removed for cleaner look */}
       </div>
 
-      <div className="relative z-10 px-6 md:px-20 lg:px-32 py-16">
+      <div className="relative z-10 px-6 md:px-20 lg:px-32 py-16 pt-32">
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -264,98 +415,125 @@ export default function ContactPage() {
             >
               <div className="absolute -top-4 -right-4 text-4xl animate-float">💌</div>
               
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold mb-6">
-                  <span className="bg-gradient-to-r from-purple-400 to-yellow-400 bg-clip-text text-transparent">
-                    Send me a message
-                  </span>
-                </h2>
+              {/* Form Box */}
+              <div className="bg-purple-900/10 backdrop-blur-md border border-purple-500/30 rounded-3xl p-8 shadow-2xl hover:border-purple-400/50 transition-all duration-300">
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold mb-6">
+                    <span className="bg-gradient-to-r from-purple-400 to-yellow-400 bg-clip-text text-transparent">
+                      Send me a message
+                    </span>
+                  </h2>
 
-                {/* Name Fields */}
-                <div className="grid md:grid-cols-2 gap-4">
+                  {/* Name Fields */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-purple-300 mb-2">
+                        First Name <span className="text-yellow-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        placeholder="Enter your first name"
+                        className="w-full px-4 py-3 rounded-xl cosmic-input text-white placeholder-purple-300/50"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-purple-300 mb-2">
+                        Last Name <span className="text-yellow-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        placeholder="Enter your last name"
+                        className="w-full px-4 py-3 rounded-xl cosmic-input text-white placeholder-purple-300/50"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Email Field */}
                   <div>
                     <label className="block text-purple-300 mb-2">
-                      First Name <span className="text-yellow-400">*</span>
+                      Email Address <span className="text-yellow-400">*</span>
                     </label>
                     <input
-                      type="text"
-                      name="firstName"
-                      value={formData.firstName}
+                      type="email"
+                      name="email"
+                      value={formData.email}
                       onChange={handleChange}
-                      placeholder="Enter your first name"
+                      placeholder="Enter your email address"
                       className="w-full px-4 py-3 rounded-xl cosmic-input text-white placeholder-purple-300/50"
                       required
                     />
                   </div>
+
+                  {/* Message Field */}
                   <div>
                     <label className="block text-purple-300 mb-2">
-                      Last Name <span className="text-yellow-400">*</span>
+                      Message <span className="text-yellow-400">*</span>
                     </label>
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={formData.lastName}
+                    <textarea
+                      name="message"
+                      value={formData.message}
                       onChange={handleChange}
-                      placeholder="Enter your last name"
-                      className="w-full px-4 py-3 rounded-xl cosmic-input text-white placeholder-purple-300/50"
+                      placeholder="Tell me about your project or just say hi! ✨"
+                      rows={6}
+                      className="w-full px-4 py-3 rounded-xl cosmic-input text-white placeholder-purple-300/50 resize-none"
                       required
                     />
+                    <div className="text-right mt-2 text-purple-400 text-sm">
+                      {charCount}/1000
+                    </div>
                   </div>
+
+                  {/* reCAPTCHA notice */}
+                  <p className="text-purple-400/60 text-xs">
+                    This form is protected by reCAPTCHA and the Google Privacy Policy and Terms of Service apply.
+                  </p>
+
+                  {/* Submit Button */}
+                  <motion.button
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className={`w-full py-4 rounded-xl cosmic-button text-white font-bold text-lg relative overflow-hidden cursor-pointer ${
+                      isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                    whileHover={!isSubmitting ? { scale: 1.02 } : {}}
+                    whileTap={!isSubmitting ? { scale: 0.98 } : {}}
+                  >
+                    {isSubmitting ? 'Sending...' : 'Send Message ✨'}
+                  </motion.button>
                 </div>
-
-                {/* Email Field */}
-                <div>
-                  <label className="block text-purple-300 mb-2">
-                    Email Address <span className="text-yellow-400">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Enter your email address"
-                    className="w-full px-4 py-3 rounded-xl cosmic-input text-white placeholder-purple-300/50"
-                    required
-                  />
-                </div>
-
-                {/* Message Field */}
-                <div>
-                  <label className="block text-purple-300 mb-2">
-                    Message <span className="text-yellow-400">*</span>
-                  </label>
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    placeholder="Tell me about your project or just say hi! ✨"
-                    rows={6}
-                    className="w-full px-4 py-3 rounded-xl cosmic-input text-white placeholder-purple-300/50 resize-none"
-                    required
-                  />
-                  <div className="text-right mt-2 text-purple-400 text-sm">
-                    {charCount}/1000
-                  </div>
-                </div>
-
-                {/* reCAPTCHA notice */}
-                <p className="text-purple-400/60 text-xs">
-                  This form is protected by reCAPTCHA and the Google Privacy Policy and Terms of Service apply.
-                </p>
-
-                {/* Submit Button */}
-                <motion.button
-                  onClick={handleSubmit}
-                  className="w-full py-4 rounded-xl cosmic-button text-white font-bold text-lg relative overflow-hidden cursor-pointer"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Send Message ✨
-                </motion.button>
               </div>
             </motion.div>
           </div>
         </div>
+        
+        {/* Success Modal */}
+        <Modal 
+          isOpen={showSuccessModal} 
+          onClose={() => setShowSuccessModal(false)} 
+          type="success" 
+        />
+        
+        {/* Error Modal */}
+        <Modal 
+          isOpen={showErrorModal} 
+          onClose={() => setShowErrorModal(false)} 
+          type="error" 
+        />
+        
+        {/* Validation Modal */}
+        <Modal 
+          isOpen={showValidationModal} 
+          onClose={() => setShowValidationModal(false)} 
+          type="validation" 
+        />
       </div>
     </main>
   );

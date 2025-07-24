@@ -30,9 +30,7 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
       triggerExplosion();
 
       // Begin fading the explosion
-      let fadeFrame = 0;
       const fadeInterval = setInterval(() => {
-        fadeFrame++;
         setExplosionOpacity((prev) => {
           if (prev <= 0.01) {
             clearInterval(fadeInterval);

@@ -22,15 +22,16 @@ export default function AboutPage() {
 
   useEffect(() => {
     const imagePromises = Object.entries(images)
-      .filter(([key]) => key !== 'niece')
-      .map(([_, src]) => {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          img.src = src;
-          img.onload = resolve;
-          img.onerror = reject;
-        });
+    .filter(([key]) => key !== 'niece')
+    .map((entry) => {
+      const src = entry[1];
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = resolve;
+        img.onerror = reject;
       });
+    });
 
     const video = document.createElement('video');
     video.src = images.niece;

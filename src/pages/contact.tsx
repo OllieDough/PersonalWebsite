@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -16,6 +17,7 @@ export default function ContactPage() {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState("");
 
   useEffect(() => {
     setIsLoaded(true);
@@ -36,38 +38,39 @@ export default function ContactPage() {
   };
 
   const handleSubmit = async () => {
-    // Prevent multiple submissions
     if (isSubmitting) return;
-    
-    // Validate form
+  
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.message) {
       setShowValidationModal(true);
       return;
     }
-    
+  
+    if (!recaptchaToken) {
+      setShowErrorModal(true);
+      return;
+    }
+  
     setIsSubmitting(true);
-    
-    // Simulate API call
+  
     try {
-      // Add a small delay to simulate network request
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Here you would normally make your API call
-      // For now, we'll simulate success/failure randomly
-      const isSuccess = Math.random() > 0.2; // 80% success rate for demo
-      
-      if (isSuccess) {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          recaptchaToken,
+        }),
+      });
+  
+      const data = await res.json();
+  
+      if (res.ok && data.success) {
         setShowSuccessModal(true);
-        // Reset form after successful submission
-        setFormData({
-          firstName: "",
-          lastName: "",
-          email: "",
-          message: ""
-        });
+        setFormData({ firstName: "", lastName: "", email: "", message: "" });
         setCharCount(0);
+        setRecaptchaToken("");
       } else {
-        throw new Error("Failed to send message");
+        throw new Error(data.error || "Failed");
       }
     } catch (error) {
       setShowErrorModal(true);
@@ -496,6 +499,11 @@ export default function ContactPage() {
                     This form is protected by reCAPTCHA and the Google Privacy Policy and Terms of Service apply.
                   </p>
 
+                  <ReCAPTCHA
+                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
+                    onChange={(token: any) => setRecaptchaToken(token || "")}
+                  />
+                  
                   {/* Submit Button */}
                   <motion.button
                     onClick={handleSubmit}

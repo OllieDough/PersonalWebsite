@@ -23,19 +23,22 @@ export default function ContactPage() {
     setIsLoaded(true);
   }, []);
 
-  const handleChange = (e) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     if (name === "message" && value.length > 1000) return;
-    
+  
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    
+  
     if (name === "message") {
       setCharCount(value.length);
     }
   };
+  
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
@@ -79,7 +82,12 @@ export default function ContactPage() {
     }
   };
 
-  const Modal = ({ isOpen, onClose, type }) => {
+  interface ModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    type: "success" | "validation" | "error";
+  }
+  const Modal: React.FC<ModalProps> = ({ isOpen, onClose, type }) => {
     useEffect(() => {
       if (isOpen) {
         // Prevent body scroll when modal is open

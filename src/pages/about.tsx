@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 
 export default function AboutPage() {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState({});
 
   const images = {
     bestMan: "/BestMan.jpeg",
@@ -20,27 +21,54 @@ export default function AboutPage() {
     yosemite: "/Yosemite.jpeg"
   };
 
+  // Priority images to load first (hero image)
+  const priorityImages = ['me'];
+
   useEffect(() => {
-    const imagePromises = Object.entries(images)
-    .filter(([key]) => key !== 'niece')
-    .map((entry) => {
-      const src = entry[1];
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.src = src;
-        img.onload = resolve;
-        img.onerror = reject;
-      });
-    });
+    // Show content immediately after a short delay
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 100);
 
-    const video = document.createElement('video');
-    video.src = images.niece;
-    video.load();
-
-    Promise.all(imagePromises)
-      .then(() => setIsLoaded(true))
-      .catch(() => setIsLoaded(true));
+    return () => clearTimeout(timer);
   }, []);
+
+  // Individual image loading handler
+  const handleImageLoad = (imageKey) => {
+    setImagesLoaded(prev => ({
+      ...prev,
+      [imageKey]: true
+    }));
+  };
+
+  // Optimized image component with lazy loading
+  const OptimizedImage = ({ src, alt, className, imageKey, priority = false }) => {
+    const [loaded, setLoaded] = useState(false);
+    const [error, setError] = useState(false);
+
+    return (
+      <div className={`relative ${className}`}>
+        {!loaded && !error && (
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-yellow-400/20 rounded-xl animate-pulse flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+        <img
+          src={src}
+          alt={alt}
+          className={`rounded-xl shadow-lg image-hover cursor-pointer transition-opacity duration-300 ${
+            loaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          loading={priority ? "eager" : "lazy"}
+          onLoad={() => {
+            setLoaded(true);
+            handleImageLoad(imageKey);
+          }}
+          onError={() => setError(true)}
+        />
+      </div>
+    );
+  };
 
   if (!isLoaded) {
     return (
@@ -130,7 +158,7 @@ export default function AboutPage() {
         }
       `}</style>
 
-      {/* Beautiful purple glow background - matching your other pages */}
+      {/* Beautiful purple glow background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle,_rgba(128,_0,_128,_0.8),_black)]" />
         
@@ -186,11 +214,22 @@ export default function AboutPage() {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <div className="absolute -inset-4 bg-gradient-to-r from-yellow-400 to-purple-400 rounded-xl blur-xl opacity-50" />
-              <img
-                src={images.me}
-                alt="Oliver Do"
-                className="relative rounded-xl shadow-xl border border-purple-400 animate-pulse-glow"
-              />
+              <div className="relative">
+                {!imagesLoaded.me && (
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-yellow-400/20 rounded-xl animate-pulse flex items-center justify-center">
+                    <div className="w-8 h-8 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+                <img
+                  src={images.me}
+                  alt="Oliver Do"
+                  className={`relative rounded-xl shadow-xl border border-purple-400 animate-pulse-glow transition-opacity duration-300 ${
+                    imagesLoaded.me ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  loading="eager"
+                  onLoad={() => handleImageLoad('me')}
+                />
+              </div>
             </motion.div>
             <div className="md:col-span-2 space-y-6">
               <h2 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-purple-400 bg-clip-text text-transparent">
@@ -223,22 +262,52 @@ export default function AboutPage() {
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
             <motion.div whileHover={{ scale: 1.05, rotate: -3 }}>
-              <img src={images.paris} alt="Paris" className="rounded-xl shadow-lg image-hover cursor-pointer" />
+              <OptimizedImage 
+                src={images.paris} 
+                alt="Paris" 
+                className="rounded-xl shadow-lg image-hover cursor-pointer"
+                imageKey="paris"
+              />
             </motion.div>
             <motion.div whileHover={{ scale: 1.05, rotate: 3 }}>
-              <img src={images.yosemite} alt="Yosemite" className="rounded-xl shadow-lg image-hover cursor-pointer" />
+              <OptimizedImage 
+                src={images.yosemite} 
+                alt="Yosemite" 
+                className="rounded-xl shadow-lg image-hover cursor-pointer"
+                imageKey="yosemite"
+              />
             </motion.div>
             <motion.div whileHover={{ scale: 1.05, rotate: -2 }}>
-              <img src={images.luna} alt="Luna" className="rounded-xl shadow-lg image-hover cursor-pointer" />
+              <OptimizedImage 
+                src={images.luna} 
+                alt="Luna" 
+                className="rounded-xl shadow-lg image-hover cursor-pointer"
+                imageKey="luna"
+              />
             </motion.div>
             <motion.div whileHover={{ scale: 1.05, rotate: 2 }}>
-              <img src={images.carryingLuna} alt="Carrying Luna" className="rounded-xl shadow-lg image-hover cursor-pointer" />
+              <OptimizedImage 
+                src={images.carryingLuna} 
+                alt="Carrying Luna" 
+                className="rounded-xl shadow-lg image-hover cursor-pointer"
+                imageKey="carryingLuna"
+              />
             </motion.div>
             <motion.div whileHover={{ scale: 1.05, rotate: -3 }}>
-              <img src={images.children} alt="Children" className="rounded-xl shadow-lg image-hover cursor-pointer" />
+              <OptimizedImage 
+                src={images.children} 
+                alt="Children" 
+                className="rounded-xl shadow-lg image-hover cursor-pointer"
+                imageKey="children"
+              />
             </motion.div>
             <motion.div whileHover={{ scale: 1.05, rotate: 1 }}>
-              <img src={images.travisWedding} alt="Wedding" className="rounded-xl shadow-lg image-hover cursor-pointer" />
+              <OptimizedImage 
+                src={images.travisWedding} 
+                alt="Wedding" 
+                className="rounded-xl shadow-lg image-hover cursor-pointer"
+                imageKey="travisWedding"
+              />
             </motion.div>
           </div>
           <motion.div 
@@ -256,6 +325,7 @@ export default function AboutPage() {
                 muted
                 loop
                 className="relative rounded-xl shadow-2xl w-full"
+                preload="metadata"
               />
             </div>
             <p className="mt-4 text-center text-purple-300 italic">

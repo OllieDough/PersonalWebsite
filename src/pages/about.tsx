@@ -203,52 +203,98 @@ export default function AboutPage() {
               Glimpses of the Life I Love
             </span>
           </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            <motion.div whileHover={{ scale: 1.05, rotate: -3 }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            <motion.div 
+              whileHover={{ scale: 1.03, rotate: -1 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
               <img 
                 src={images.paris} 
                 alt="Paris" 
-                className="rounded-xl shadow-lg image-hover cursor-pointer w-full h-64 object-cover"
+                className="rounded-xl shadow-xl image-hover cursor-pointer w-full h-96 object-cover"
                 loading="lazy"
               />
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05, rotate: 3 }}>
+            
+            <motion.div 
+              whileHover={{ scale: 1.03, rotate: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="relative"
+            >
               <img 
                 src={images.yosemite} 
                 alt="Yosemite" 
-                className="rounded-xl shadow-lg image-hover cursor-pointer w-full h-64 object-cover"
+                className="rounded-xl shadow-xl image-hover cursor-pointer w-full h-96 object-cover"
                 loading="lazy"
               />
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05, rotate: -2 }}>
+            
+            <motion.div 
+              whileHover={{ scale: 1.03, rotate: -0.5 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="relative"
+            >
               <img 
                 src={images.luna} 
                 alt="Luna" 
-                className="rounded-xl shadow-lg image-hover cursor-pointer w-full h-64 object-cover"
+                className="rounded-xl shadow-xl image-hover cursor-pointer w-full h-96 object-cover"
                 loading="lazy"
               />
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05, rotate: 2 }}>
+            
+            <motion.div 
+              whileHover={{ scale: 1.03, rotate: 0.5 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="relative"
+            >
               <img 
                 src={images.carryingLuna} 
                 alt="Carrying Luna" 
-                className="rounded-xl shadow-lg image-hover cursor-pointer w-full h-64 object-cover"
+                className="rounded-xl shadow-xl image-hover cursor-pointer w-full h-96 object-cover"
                 loading="lazy"
               />
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05, rotate: -3 }}>
+            
+            <motion.div 
+              whileHover={{ scale: 1.03, rotate: -0.8 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="relative md:col-span-2 max-w-2xl mx-auto"
+            >
               <img 
                 src={images.children} 
                 alt="Children" 
-                className="rounded-xl shadow-lg image-hover cursor-pointer w-full h-64 object-cover"
+                className="rounded-xl shadow-xl image-hover cursor-pointer w-full h-96 object-cover"
                 loading="lazy"
               />
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05, rotate: 1 }}>
+            
+            <motion.div 
+              whileHover={{ scale: 1.03, rotate: 0.3 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+              className="relative md:col-span-2 max-w-2xl mx-auto"
+            >
               <img 
                 src={images.travisWedding} 
                 alt="Wedding" 
-                className="rounded-xl shadow-lg image-hover cursor-pointer w-full h-64 object-cover"
+                className="rounded-xl shadow-xl image-hover cursor-pointer w-full h-96 object-cover"
                 loading="lazy"
               />
             </motion.div>

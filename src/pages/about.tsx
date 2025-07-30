@@ -4,13 +4,12 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 export default function AboutPage() {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [imagesLoaded, setImagesLoaded] = useState({});
+  const [showPage, setShowPage] = useState(false);
 
   const images = {
     bestMan: "/BestMan.jpeg",
     carryingLuna: "/CarryingLuna.jpeg",
-    children: "/Children.jpeg",
+    children: "/Children.jpeg", 
     childrenCuddling: "/ChildrenCuddling.jpeg",
     jiuJitsu: "/JiuJitsu.jpeg",
     luna: "/LunaInShirt.jpeg",
@@ -21,56 +20,12 @@ export default function AboutPage() {
     yosemite: "/Yosemite.jpeg"
   };
 
-  // Priority images to load first (hero image)
-  const priorityImages = ['me'];
-
+  // Show page immediately - no waiting
   useEffect(() => {
-    // Show content immediately after a short delay
-    const timer = setTimeout(() => {
-      setIsLoaded(true);
-    }, 100);
-
-    return () => clearTimeout(timer);
+    setShowPage(true);
   }, []);
 
-  // Individual image loading handler
-  const handleImageLoad = (imageKey) => {
-    setImagesLoaded(prev => ({
-      ...prev,
-      [imageKey]: true
-    }));
-  };
-
-  // Optimized image component with lazy loading
-  const OptimizedImage = ({ src, alt, className, imageKey, priority = false }) => {
-    const [loaded, setLoaded] = useState(false);
-    const [error, setError] = useState(false);
-
-    return (
-      <div className={`relative ${className}`}>
-        {!loaded && !error && (
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-yellow-400/20 rounded-xl animate-pulse flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
-        <img
-          src={src}
-          alt={alt}
-          className={`rounded-xl shadow-lg image-hover cursor-pointer transition-opacity duration-300 ${
-            loaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          loading={priority ? "eager" : "lazy"}
-          onLoad={() => {
-            setLoaded(true);
-            handleImageLoad(imageKey);
-          }}
-          onError={() => setError(true)}
-        />
-      </div>
-    );
-  };
-
-  if (!isLoaded) {
+  if (!showPage) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <motion.div
@@ -158,16 +113,14 @@ export default function AboutPage() {
         }
       `}</style>
 
-      {/* Beautiful purple glow background */}
+      {/* Background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle,_rgba(128,_0,_128,_0.8),_black)]" />
         
-        {/* Animated gradient orbs */}
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-purple-500/50 rounded-full blur-[150px] animate-pulse" />
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-pink-500/50 rounded-full blur-[150px] animate-pulse delay-700" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-600/40 rounded-full blur-[180px] animate-pulse delay-1000" />
         
-        {/* Golden accent orbs */}
         <div className="absolute inset-0">
           <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-yellow-400/20 to-amber-500/20 rounded-full blur-3xl animate-float" />
           <div className="absolute bottom-20 left-20 w-96 h-96 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
@@ -214,22 +167,12 @@ export default function AboutPage() {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <div className="absolute -inset-4 bg-gradient-to-r from-yellow-400 to-purple-400 rounded-xl blur-xl opacity-50" />
-              <div className="relative">
-                {!imagesLoaded.me && (
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-yellow-400/20 rounded-xl animate-pulse flex items-center justify-center">
-                    <div className="w-8 h-8 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                )}
-                <img
-                  src={images.me}
-                  alt="Oliver Do"
-                  className={`relative rounded-xl shadow-xl border border-purple-400 animate-pulse-glow transition-opacity duration-300 ${
-                    imagesLoaded.me ? 'opacity-100' : 'opacity-0'
-                  }`}
-                  loading="eager"
-                  onLoad={() => handleImageLoad('me')}
-                />
-              </div>
+              <img
+                src={images.me}
+                alt="Oliver Do"
+                className="relative rounded-xl shadow-xl border border-purple-400 animate-pulse-glow"
+                loading="eager"
+              />
             </motion.div>
             <div className="md:col-span-2 space-y-6">
               <h2 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-purple-400 bg-clip-text text-transparent">
@@ -262,51 +205,51 @@ export default function AboutPage() {
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
             <motion.div whileHover={{ scale: 1.05, rotate: -3 }}>
-              <OptimizedImage 
+              <img 
                 src={images.paris} 
                 alt="Paris" 
-                className="rounded-xl shadow-lg image-hover cursor-pointer"
-                imageKey="paris"
+                className="rounded-xl shadow-lg image-hover cursor-pointer w-full h-64 object-cover"
+                loading="lazy"
               />
             </motion.div>
             <motion.div whileHover={{ scale: 1.05, rotate: 3 }}>
-              <OptimizedImage 
+              <img 
                 src={images.yosemite} 
                 alt="Yosemite" 
-                className="rounded-xl shadow-lg image-hover cursor-pointer"
-                imageKey="yosemite"
+                className="rounded-xl shadow-lg image-hover cursor-pointer w-full h-64 object-cover"
+                loading="lazy"
               />
             </motion.div>
             <motion.div whileHover={{ scale: 1.05, rotate: -2 }}>
-              <OptimizedImage 
+              <img 
                 src={images.luna} 
                 alt="Luna" 
-                className="rounded-xl shadow-lg image-hover cursor-pointer"
-                imageKey="luna"
+                className="rounded-xl shadow-lg image-hover cursor-pointer w-full h-64 object-cover"
+                loading="lazy"
               />
             </motion.div>
             <motion.div whileHover={{ scale: 1.05, rotate: 2 }}>
-              <OptimizedImage 
+              <img 
                 src={images.carryingLuna} 
                 alt="Carrying Luna" 
-                className="rounded-xl shadow-lg image-hover cursor-pointer"
-                imageKey="carryingLuna"
+                className="rounded-xl shadow-lg image-hover cursor-pointer w-full h-64 object-cover"
+                loading="lazy"
               />
             </motion.div>
             <motion.div whileHover={{ scale: 1.05, rotate: -3 }}>
-              <OptimizedImage 
+              <img 
                 src={images.children} 
                 alt="Children" 
-                className="rounded-xl shadow-lg image-hover cursor-pointer"
-                imageKey="children"
+                className="rounded-xl shadow-lg image-hover cursor-pointer w-full h-64 object-cover"
+                loading="lazy"
               />
             </motion.div>
             <motion.div whileHover={{ scale: 1.05, rotate: 1 }}>
-              <OptimizedImage 
+              <img 
                 src={images.travisWedding} 
                 alt="Wedding" 
-                className="rounded-xl shadow-lg image-hover cursor-pointer"
-                imageKey="travisWedding"
+                className="rounded-xl shadow-lg image-hover cursor-pointer w-full h-64 object-cover"
+                loading="lazy"
               />
             </motion.div>
           </div>
@@ -321,7 +264,6 @@ export default function AboutPage() {
               <video
                 src={images.niece}
                 controls
-                autoPlay
                 muted
                 loop
                 className="relative rounded-xl shadow-2xl w-full"

@@ -130,14 +130,14 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
               alt=""
               style={{
                 position: "absolute",
-                top: "45.5%",
-                left: "48.0%",
-                transformOrigin: "center",
+                top: "50%",
+                left: "50%",
+                transformOrigin: "50% 50%",
                 animation: "orbit 10s linear infinite",
                 animationDelay: `${(index / 8) * -10}s`,
-                transform: `rotate(${angle}deg) translate(150px)`,
-                width: "60px",
-                height: "60px",
+                transform: `translate(-50%, -50%) rotate(${angle}deg) translate(150px) rotate(-${angle}deg)`,
+                width: "clamp(40px, 8vw, 60px)",
+                height: "clamp(40px, 8vw, 60px)",
                 zIndex: 5,
               }}
             />
@@ -147,17 +147,17 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
       {/* Quote */}
       {!exploded && (
         <div className="splash-quote">
-          "The World was too heavy so I became light"
+          "The world was too heavy so I became light"
         </div>
       )}
 
       <style jsx>{`
         .splash-quote {
           position: absolute;
-          top: calc(50% + 180px);
+          top: calc(50% + clamp(120px, 20vh, 180px));
           left: 50%;
           transform: translateX(-50%);
-          font-size: 1.2rem;
+          font-size: clamp(1rem, 3vw, 1.2rem);
           font-family: 'Cormorant Garamond', 'Georgia', serif;
           font-weight: 600;
           letter-spacing: 0.1em;
@@ -169,14 +169,24 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           animation: shimmer 3s infinite ease-in-out;
+          text-align: center;
+          padding: 0 20px;
+          white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+          .splash-quote {
+            white-space: normal;
+            max-width: 90vw;
+          }
         }
 
         @keyframes orbit {
           0% {
-            transform: rotate(0deg) translate(150px);
+            transform: translate(-50%, -50%) rotate(0deg) translate(clamp(100px, 20vw, 150px)) rotate(0deg);
           }
           100% {
-            transform: rotate(360deg) translate(150px);
+            transform: translate(-50%, -50%) rotate(360deg) translate(clamp(100px, 20vw, 150px)) rotate(-360deg);
           }
         }
 

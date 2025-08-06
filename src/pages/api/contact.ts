@@ -10,7 +10,7 @@ const redis = new Redis(process.env.REDIS_URL!); // e.g., from Upstash or your o
 const rateLimiter = new RateLimiterRedis({
   storeClient: redis,
   keyPrefix: "contact-page",
-  points: 3, // max 3 requests
+  points: 5, // max 5 request
   duration: 600, // per 10 minutes
 });
 
@@ -26,7 +26,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(429).json({ error: "Too many requests. Please try again later." });
   }
 
-  // Verify reCAPTCHA
   const captchaRes = await fetch("https://www.google.com/recaptcha/api/siteverify", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -44,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL!,
+      from: email!,
       to: process.env.RESEND_TO_EMAIL!,
       subject: "New Contact Form Submission",
       html: `

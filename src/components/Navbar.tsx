@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -19,7 +18,7 @@ const socialLinks = [
 
 export default function Navbar() {
   const [hovering, setHovering] = useState(false);
-
+  
   return (
     <nav
       style={{
@@ -41,16 +40,17 @@ export default function Navbar() {
       <div style={styles.rightSection}>
         <ul style={styles.navList}>
           {navItems.map((item) => (
-            <motion.li
-              key={item.href}
-              whileHover={item.hover}
-              transition={{ type: "spring", stiffness: 200, damping: 10 }}
-              style={styles.navItem}
-            >
+            <li key={item.href} style={styles.navItem}>
               <Link href={item.href} style={styles.link}>
-                <motion.span style={styles.navText}>{item.label}</motion.span>
+                <motion.div
+                  whileHover={item.hover}
+                  transition={{ type: "spring", stiffness: 200, damping: 10 }}
+                  style={styles.motionContainer}
+                >
+                  <span style={styles.navText}>{item.label}</span>
+                </motion.div>
               </Link>
-            </motion.li>
+            </li>
           ))}
         </ul>
 
@@ -60,21 +60,22 @@ export default function Navbar() {
         {/* Social Icons */}
         <ul style={styles.iconList}>
           {socialLinks.map((item, index) => (
-            <motion.li
-              key={index}
-              whileHover={{ scale: 1.3, rotate: 10 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              style={styles.iconItem}
-            >
+            <li key={index} style={styles.iconItem}>
               <a
                 href={item.href}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={styles.iconLink}
               >
-                {item.icon}
+                <motion.div
+                  whileHover={{ scale: 1.3, rotate: 10 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                  style={styles.iconMotionContainer}
+                >
+                  {item.icon}
+                </motion.div>
               </a>
-            </motion.li>
+            </li>
           ))}
         </ul>
       </div>
@@ -117,6 +118,15 @@ const styles = {
   },
   link: {
     textDecoration: "none",
+    display: "block",
+    padding: "0.5rem", // Added padding to increase clickable area
+  },
+  motionContainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: "60px", // Ensure minimum width for clickable area
+    minHeight: "30px", // Ensure minimum height for clickable area
   },
   navText: {
     fontFamily: "'Orbitron', sans-serif",
@@ -143,5 +153,14 @@ const styles = {
   iconLink: {
     color: "#aa66cc",
     transition: "color 0.3s",
+    display: "block",
+    padding: "0.5rem", // Added padding to increase clickable area
+  },
+  iconMotionContainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: "40px", // Ensure minimum width for clickable area
+    minHeight: "40px", // Ensure minimum height for clickable area
   },
 };

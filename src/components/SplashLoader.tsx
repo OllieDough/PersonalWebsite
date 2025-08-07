@@ -7,10 +7,15 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
   const [exploded, setExploded] = useState(false);
   const [shrinking, setShrinking] = useState(false);
   const [explosionOpacity, setExplosionOpacity] = useState(1);
+  const [isFinishing, setIsFinishing] = useState(false);
+  
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const explosionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (exploded) return;
+    if (exploded || isFinishing) return;
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
     const distance = Math.sqrt((e.clientX - cx) ** 2 + (e.clientY - cy) ** 2);
@@ -19,40 +24,85 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
   };
 
   const handleMouseLeave = () => {
-    if (!exploded) setGlowIntensity(0);
+    if (!exploded && !isFinishing) setGlowIntensity(0);
+  };
+
+  const finishSplash = () => {
+    if (isFinishing) return;
+    setIsFinishing(true);
+    
+    // Clear all timeouts and intervals
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (explosionTimeoutRef.current) clearTimeout(explosionTimeoutRef.current);
+    if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+    
+    // Clear canvas if it exists
+    const canvas = document.getElementById("explosion-canvas") as HTMLCanvasElement;
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+    
+    onFinish();
   };
 
   const handleGoatClick = () => {
-    if (shrinking) return;
+    if (shrinking || isFinishing) return;
+    
     setShrinking(true);
-    setTimeout(() => {
+    
+    explosionTimeoutRef.current = setTimeout(() => {
       setExploded(true);
       triggerExplosion();
 
       // Begin fading the explosion
-      const fadeInterval = setInterval(() => {
+      fadeIntervalRef.current = setInterval(() => {
         setExplosionOpacity((prev) => {
           if (prev <= 0.01) {
-            clearInterval(fadeInterval);
+            if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
             return 0;
           }
           return prev - 0.02;
         });
       }, 50);
 
-      setTimeout(onFinish, 2400); // Index fades in while explosion fades
+      // Finish after animation
+      timeoutRef.current = setTimeout(finishSplash, 2400);
     }, 400);
   };
 
-  const handleDoubleClick = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    onFinish();
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    finishSplash();
   };
 
+  // Emergency fallback - if splash doesn't finish in 10 seconds, force finish
   useEffect(() => {
+    const emergencyTimeout = setTimeout(finishSplash, 10000);
+    
     return () => {
+      clearTimeout(emergencyTimeout);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (explosionTimeoutRef.current) clearTimeout(explosionTimeoutRef.current);
+      if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     };
+  }, []);
+
+  // Add keyboard escape handler
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+        finishSplash();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
 
   return (
@@ -66,6 +116,7 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
         overflow: "hidden",
         position: "relative",
         background: "radial-gradient(circle, rgba(128, 0, 128, 0.8), black)",
+        cursor: isFinishing ? 'wait' : 'pointer',
       }}
     >
       {/* Canvas explosion layer */}
@@ -85,7 +136,7 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
       />
 
       {/* GOAT */}
-      {!exploded && (
+      {!exploded && !isFinishing && (
         <div
           onClick={handleGoatClick}
           onDoubleClick={handleDoubleClick}
@@ -120,7 +171,7 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
       )}
 
       {/* Orbiting snakes & dragons */}
-      {!exploded &&
+      {!exploded && !isFinishing &&
         Array.from({ length: 8 }).map((_, index) => {
           const angle = (index / 8) * 360;
           return (
@@ -145,9 +196,44 @@ const SplashLoader = ({ onFinish }: { onFinish: () => void }) => {
         })}
 
       {/* Quote */}
-      {!exploded && (
+      {!exploded && !isFinishing && (
         <div className="splash-quote">
           "The world was too heavy so I became light"
+        </div>
+      )}
+
+      {/* Loading indicator when finishing */}
+      {isFinishing && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            color: 'white',
+            fontSize: '1.2rem',
+            zIndex: 20,
+          }}
+        >
+          Loading...
+        </div>
+      )}
+
+      {/* Skip instruction */}
+      {!exploded && !isFinishing && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontSize: '0.9rem',
+            zIndex: 20,
+            textAlign: 'center',
+          }}
+        >
+          Double-click or press ESC to skip
         </div>
       )}
 
@@ -233,6 +319,7 @@ function triggerExplosion() {
   const ctx = canvas?.getContext("2d");
   if (!canvas || !ctx) return;
 
+  // Set canvas size
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
@@ -241,13 +328,14 @@ function triggerExplosion() {
 
   let stars: any[] = [];
   let frame = 0;
-  const maxFrames = 300;
+  const maxFrames = 200; // Reduced from 300 to prevent long-running animation
+  let animationId: number;
 
-  const createStars = (count = 100) => {
+  const createStars = (count = 80) => { // Reduced particle count for better performance
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 15 + 5;
-      const length = Math.random() * 50 + 20;
+      const speed = Math.random() * 12 + 4; // Slightly faster
+      const length = Math.random() * 40 + 15; // Smaller particles
       stars.push({
         x: centerX,
         y: centerY,
@@ -266,10 +354,10 @@ function triggerExplosion() {
       star.x += vx;
       star.y += vy;
       star.length *= 0.98;
-      star.alpha *= 0.985;
+      star.alpha *= 0.988; // Slightly faster fade
       return star;
     });
-    stars = stars.filter((star) => star.alpha > 0);
+    stars = stars.filter((star) => star.alpha > 0.01); // Remove very faint stars sooner
   };
 
   const drawStars = () => {
@@ -278,7 +366,7 @@ function triggerExplosion() {
       const vy = Math.sin(star.angle) * star.speed;
       ctx.beginPath();
       ctx.strokeStyle = `rgba(255, 255, 255, ${star.alpha})`;
-      ctx.lineWidth = 1.3;
+      ctx.lineWidth = 1.2;
       ctx.moveTo(star.x, star.y);
       ctx.lineTo(star.x - vx * star.length * 0.1, star.y - vy * star.length * 0.1);
       ctx.stroke();
@@ -287,13 +375,32 @@ function triggerExplosion() {
 
   const render = () => {
     frame++;
-    ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.25)"; // Slightly faster fade
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    if (frame < maxFrames && frame % 2 === 0) createStars(80);
+    
+    if (frame < maxFrames && frame % 3 === 0) { // Create stars less frequently
+      createStars(60);
+    }
+    
     updateStars();
     drawStars();
-    if (frame < maxFrames || stars.length > 0) requestAnimationFrame(render);
+    
+    if (frame < maxFrames || stars.length > 0) {
+      animationId = requestAnimationFrame(render);
+    } else {
+      // Clear canvas when animation is complete
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
   };
 
   render();
+
+  // Safety timeout to stop animation after 5 seconds regardless
+  setTimeout(() => {
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars = [];
+  }, 5000);
 }
